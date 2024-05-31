@@ -9,6 +9,10 @@ import bookingRoutes from './routes/bookingRoutes.js'
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
 import { fileURLToPath } from 'url';
 import { dirname, join } from "path";
+import cron from 'node-cron';
+import sendReminderEmails from "./services/reminderService.js";
+import paymentRoutes from './routes/paymentRoutes.js';
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,8 +32,12 @@ app.use("/user", userRoutes)
 app.use("/events", eventRoutes)
 app.use("/test", testRoutes)
 app.use("/booking", bookingRoutes)
+app.use('/payments', paymentRoutes);
 
-
+cron.schedule('0 8 * * *', async () => {
+    console.log('Running daily job to send reminder emails');
+    await sendReminderEmails();
+});
 
 app.use('', express.static(join(__dirname, '/uploads')));
 

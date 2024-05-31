@@ -4,6 +4,8 @@ import Booking from "../../models/booking.js";
 import Events from "../../models/event.js";
 import { sendConfirmationEmail } from "../../services/mailService.js";
 import Users from "../../models/user.js";
+import moment from "moment";
+import { generateQrCode } from "../../util/generateQrCode.js";
 
 // export const add = async (req, res, next) => {
 //     try {
@@ -74,12 +76,19 @@ export const add = async (req, res, next) => {
             user: userId,
             event: event_id,
             date,
-            tickets
+            tickets,
+            filepathVar
         }).save();
+
+        console.log(savedBooking,'savedbooking')
 
         if (!savedBooking) {
             return next(new HttpError("Oops! Booking failed", 500));
         } else {
+            const bookingUrl = `${process.env.BASE_URL}booking/view${savedBooking._id}`
+            // Date.now() + "_" + name
+            const filename = Date.now() + "_" + savedBooking._id.toString().slice(savedBooking._id.length-5)
+            generateQrCode(bookingUrl, filename  )
             eventData.availability -= tickets;
             await eventData.save();
 
@@ -88,7 +97,7 @@ export const add = async (req, res, next) => {
             if (user) {
                 const to = user.email;
                 const subject = 'Booking Confirmation';
-                const body = `Dear ${user.first_name} ${user.last_name},\n\nYour booking for ${eventData.title} on ${date} for ${tickets} tickets is confirmed!\n\nThank you!`;
+                const body = `Dear ${user.first_name} ${user.last_name},\n\nYour booking for ${eventData.title} on ${moment(date).format('MMMM Do YYYY')} for ${tickets} tickets is confirmed!\n\nThank you!`;
 
                 await sendConfirmationEmail(to, subject, body);
             }

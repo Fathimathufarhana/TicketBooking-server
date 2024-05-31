@@ -88,7 +88,7 @@ import jwt from "jsonwebtoken";
                    status : true,
                    message : 'Login successful',
                    access_token : token,
-                   result:{
+                   data:{
                     role: user.role, 
                     _id: user._id
                    }
@@ -109,20 +109,35 @@ import jwt from "jsonwebtoken";
       const errors = validationResult(req);
       if ( ! errors.isEmpty() ) {
 
-        return next( new HttpError( 
-          "Invalid data inputs passed, Please check your data before retry!",
-          422 
-          ));
+        return next( new HttpError("Invalid data inputs passed, Please check your data before retry!",422 ));
       } else {
+
         const { userId } = req.userData 
-         res.status(200).json({
-                status : true,
-                message : '',
-                data: userId,
-                access_token : null
-              })
-          }
+
+        const user = await Users.findOne({ _id: userId })
+
+        if ( ! user ) {
+          return next( new HttpError("Invalid data inputs passed, Please check your data before retry!",422 ));
+        } else {
+
+          const token = jwt.sign(
+            { userId : user._id, userEmail : user.email, role : user.role }, 
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_TOKEN_EXPIRY }
+          );
+          res.status(200).json({
+            status : true,
+            message : '',
+            data: {
+              role: user.role, 
+              _id: user._id
+            },
+            access_token : token
+          })
+        }
+      }
     } catch ( error ) {
+
       return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) );
     }
   };
@@ -227,3 +242,4 @@ import jwt from "jsonwebtoken";
       return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) )
     }
   }
+  

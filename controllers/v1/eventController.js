@@ -2,7 +2,6 @@ import { validationResult } from "express-validator";
 import HttpError from "../../middlewares/httpError.js";
 import Events from "../../models/event.js";
 import fs from "fs"
-import Users from "../../models/user.js";
 import Booking from "../../models/booking.js";
 import { sendUpdationEmail } from "../../services/mailService.js";
 
@@ -161,85 +160,6 @@ export const deleteEvent = async (req, res, next) => {
     }
 }
 
-// export const editEvent = async(req, res, next) => {
-//     try {
-//         const errors = validationResult(req)
-//         if (! errors.isEmpty()) {
-//             return next( new HttpError( "Something went wrong...", 422 ))
-//         } else {
-//             const { role } = req.userData
-//             const { 
-//                 event_id,
-//                 title, 
-//                 start_date,
-//                 end_date,
-//                 moment,
-//                 description,
-//                 totalTickets,
-//                 duration,
-//                 latitude,
-//                 longitude,
-//                 venue,
-//                 price
-//                 } = req.body;
-
-         
-//             if ( role !== 'admin'){
-                
-//                 return next( new HttpError( "Access denied!!", 500 ) );
-
-//             } else {
-
-//                 const eventData = await Events.findOne({ _id : event_id })
-//                 const image = req.file ? 
-//                          process.env.BASE_URL + "/cover_images/" + req.file.filename : 
-//                          eventData.image
-//                 if ( req.file && eventData.image !== null ) {
-//                     const prevImgPath = eventData.image.slice(22)
-//                     fs.unlink(`./uploads/${ prevImgPath }`, (err) => {
-//                         if (err) {
-//                             console.error(err)
-//                             return
-//                         }
-//                     })
-//                 } 
-//                 const editEvent = await Events.findOneAndUpdate(
-//                     { _id: event_id },
-//                     { 
-//                         title, 
-//                         start_date,
-//                         end_date,
-//                         moment,
-//                         description,
-//                         totalTickets,
-//                         duration,
-//                         latitude,
-//                         longitude,
-//                         venue,
-//                         price,
-//                         image
-//                      },
-//                      { new : true })
-
-//                 if ( ! editEvent ){
-//                     return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) );
-//                 } else {
-//                 //  const user = await Users.findById(userId)
-//                     res.status(200).json({  
-//                         status: true,
-//                         message: 'Event updated',
-//                         data: process.env.NODE_ENV === 'dev' ? editEvent : null,
-//                         access_token: null
-//                     })
-//                 }
-//             }
-            
-//         }
-//     } catch ( error ) {
-//         return next(new HttpError("Oops! Process failed, please do contact admin", 500));
-//     }
-// }
-
 export const editEvent = async(req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -304,10 +224,8 @@ export const editEvent = async(req, res, next) => {
                 if (! editEvent) {
                     return next(new HttpError("Oops! Process failed, please do contact admin", 500));
                 } else {
-                    // Retrieve all bookings for the updated event
                     const bookings = await Booking.find({ event: event_id }).populate('user');
 
-                    // Send email notifications to users who have booked the updated event
                     for (const booking of bookings) {
                         console.log(booking,'booking')
                         console.log(bookings,'bookings')
