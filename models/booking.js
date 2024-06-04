@@ -18,6 +18,9 @@ const bookingSchema = new Schema({
         type: Number,
         required: true
     },
+    qrCodePath: {
+        type: String
+    },
     status: {
         type: String,
         

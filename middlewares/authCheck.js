@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
 import HttpError from "./httpError.js";
-// import Employee from "../models/employ.js";
-// import { User } from "../models/user.js";
 import User from "../models/user.js"
 
 

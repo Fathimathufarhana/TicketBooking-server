@@ -9,6 +9,7 @@ export const createEvent = async (req, res, next) => {
     try {
         const errors = validationResult(req)
         if (! errors.isEmpty() ) {
+
             return next( new HttpError( "Something went wrong...", 422 ) )
         } else {
             const { role } = req.userData;
@@ -25,7 +26,7 @@ export const createEvent = async (req, res, next) => {
                 venue,
                 star_rating,
                 price
-                    } = req.body;
+            } = req.body;
 
             const image = req.file ? process.env.BASE_URL + "cover_images/" + req.file.filename : null;
     
@@ -80,11 +81,14 @@ export const listEvents = async (req, res, next) => {
         } else {
 
         const { q, price } = req.body
+
         let query = {isDeleted : false}
+
         if( q ){
             const searchValue = q.toLowerCase()
             query.title = { $regex: searchValue, $options: "i" }
         }
+
         if( price ){
             query.price = { $lte : price }
         }
@@ -93,7 +97,7 @@ export const listEvents = async (req, res, next) => {
             res.status(200).json({
                 status: true,
                 message: '',
-                data: events,
+                data: process.env.NODE_ENV === 'dev' ? events : null,
                 access_token: null
             })
         }
@@ -119,12 +123,12 @@ export const viewEvent = async (req, res, next) => {
             res.status(200).json({
                 status: true,
                 message: '',
-                data: viewEvent,
+                data: process.env.NODE_ENV === 'dev' ? viewEvent : null,
                 access_token: null
             })
            }
         }
-    } catch (error) {
+    } catch ( error ) {
         return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) );
     }
 }
@@ -227,14 +231,16 @@ export const editEvent = async(req, res, next) => {
                     const bookings = await Booking.find({ event: event_id }).populate('user');
 
                     for (const booking of bookings) {
-                        console.log(booking,'booking')
-                        console.log(bookings,'bookings')
                         const user = booking.user;
                         const userEmail = user.email;
                         const emailSubject = 'Event Update Notification';
-                        const emailBody = `Dear ${user.first_name} ${user.last_name},\n\nThe event "${editEvent.title}" you have booked has been updated. Please check the new details.\n\nThank you!`;
+                        const context = {
+                            first_name: user.first_name,
+                            last_name: user.last_name,
+                            title: editEvent.title
+                        }
 
-                        await sendUpdationEmail(userEmail, emailSubject, emailBody);
+                        await sendUpdationEmail(userEmail, emailSubject, context);
                     }
 
                     res.status(200).json({  
@@ -247,7 +253,6 @@ export const editEvent = async(req, res, next) => {
             }
         }
     } catch (error) {
-        console.log(error.message)
         return next(new HttpError("Oops! Process failed, please do contact admin", 500));
     }
 }

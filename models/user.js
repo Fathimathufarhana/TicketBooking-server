@@ -48,7 +48,6 @@ const userSchema = new Schema({
     phone: {
         phone_number: {
             type: Number,
-            // required: true,
             unique: true
         },
         country_code: {

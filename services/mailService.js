@@ -1,13 +1,13 @@
 import transporter from '../config/mailerConfig.js';
 
-export const sendConfirmationEmail = async (to, subject, text) => {
+export const sendConfirmationEmail = async (to, subject, context) => {
 
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        // template: "booking_confirm_email",
+        template: "booking_confirm_email",
         to,
         subject,
-        text 
+        context
     };
 
     try {
@@ -19,13 +19,13 @@ export const sendConfirmationEmail = async (to, subject, text) => {
 };
 
 
-export const sendUpdationEmail = async (to, subject, text) => {
+export const sendUpdationEmail = async (to, subject, context) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        // template: "booking_confirm_email",
+        template: "event_updation_email",
         to,
         subject,
-        text 
+        context 
     };
 
     try {
@@ -37,13 +37,13 @@ export const sendUpdationEmail = async (to, subject, text) => {
 };
 
 
-export const sendReminderEmail = async (to, subject, text) => {
+export const sendReminderEmail = async (to, subject, context) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        // template: "booking_confirm_email",
+        template: "booking_reminder_email",
         to,
         subject,
-        text 
+        context 
     };
 
     try {

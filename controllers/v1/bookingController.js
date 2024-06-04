@@ -7,53 +7,6 @@ import Users from "../../models/user.js";
 import moment from "moment";
 import { generateQrCode } from "../../util/generateQrCode.js";
 
-// export const add = async (req, res, next) => {
-//     try {
-//         const errors = validationResult(req);
-//         if (!errors.isEmpty()) {
-//             return next(new HttpError("Something went wrong...", 422));
-//         } else {
-//             const { userId } = req.userData;
-//             const { event_id, date, tickets } = req.body;
-
-//             const eventData = await Events.findById(event_id);
-//             if ( ! eventData ) {
-
-//                 return next(new HttpError("Event not found", 404));
-//             }
-//             if ( eventData.availability < tickets ) {
-//                 return next(new HttpError("Not enough tickets available", 400));
-//             }
-
-//             const savedBooking = await new Booking({
-//                 user: userId,
-//                 event: event_id,
-//                 date,
-//                 tickets
-//             }).save();
-
-//             if (!savedBooking) {
-//                 return next(new HttpError("Oops! Booking failed", 500));
-//             } else {
-//                 eventData.availability -= tickets;
-//                 await eventData.save();
-//                 await confirmBooking(savedBooking)
-
-//                 res.status(200).json({
-//                     status: true,
-//                     message: 'Booking successful',
-//                     data: process.env.NODE_ENV === 'dev' ? savedBooking : null,
-//                     access_token: null
-//                 });
-//             }
-//         }
-//     } catch (error) {
-//         console.log(error.message)
-//         return next(new HttpError("Oops! Process failed, please do contact admin", 500));
-//     }
-// };
-
-
 export const add = async (req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -65,6 +18,7 @@ export const add = async (req, res, next) => {
         const { event_id, date, tickets } = req.body;
 
         const eventData = await Events.findById(event_id);
+
         if (!eventData) {
             return next(new HttpError("Event not found", 404));
         }
@@ -77,29 +31,37 @@ export const add = async (req, res, next) => {
             event: event_id,
             date,
             tickets,
-            filepathVar
         }).save();
-
-        console.log(savedBooking,'savedbooking')
 
         if (!savedBooking) {
             return next(new HttpError("Oops! Booking failed", 500));
         } else {
-            const bookingUrl = `${process.env.BASE_URL}booking/view${savedBooking._id}`
-            // Date.now() + "_" + name
-            const filename = Date.now() + "_" + savedBooking._id.toString().slice(savedBooking._id.length-5)
-            generateQrCode(bookingUrl, filename  )
+            const bookingUrl = `${process.env.BASE_URL}booking/view/${savedBooking._id}`;
+            const filename = Date.now() + "_" + savedBooking._id.toString().slice(savedBooking._id.length - 5);
+            const qrCodePath = await generateQrCode(bookingUrl, filename);
+
+            const qrCode = qrCodePath ? process.env.BASE_URL + qrCodePath : null;
+
+            savedBooking.qrCodePath = qrCode;
+            await savedBooking.save();
+
             eventData.availability -= tickets;
             await eventData.save();
 
-            // Send confirmation email
             const user = await Users.findById(userId);
             if (user) {
                 const to = user.email;
                 const subject = 'Booking Confirmation';
-                const body = `Dear ${user.first_name} ${user.last_name},\n\nYour booking for ${eventData.title} on ${moment(date).format('MMMM Do YYYY')} for ${tickets} tickets is confirmed!\n\nThank you!`;
 
-                await sendConfirmationEmail(to, subject, body);
+                const context = {
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    event_title: eventData.title,
+                    event_date: moment(date).format('MMMM Do YYYY'),
+                    tickets: tickets
+                };
+
+                await sendConfirmationEmail(to, subject, context);
             }
 
             res.status(200).json({
@@ -111,10 +73,9 @@ export const add = async (req, res, next) => {
         }
     } catch (error) {
         console.log(error);
-        return next(new HttpError("Oops! Process failed, please do contact admin", 500));
+        return next(new HttpError("Oops! Process failed, please contact admin", 500));
     }
 };
-
 
 export const list = async (req, res, next) => {
     try {
@@ -139,7 +100,7 @@ export const list = async (req, res, next) => {
                 access_token: null
             })
         }
-    } catch (error) {
+    } catch ( error ) {
         return next(new HttpError("Oops! Process failed, please do contact admin", 500));
     }
 }
@@ -194,10 +155,6 @@ export const myBookings = async (req, res, next) => {
         }
 
         const viewBookings = await Booking.find({ user: user_id })
-            // .populate({
-            //     path: "user",
-            //     select: "first_name last_name email"
-            // })
             .populate({
                 path: "event",
                 select: "title venue"
@@ -217,45 +174,3 @@ export const myBookings = async (req, res, next) => {
         return next(new HttpError("Oops! Process failed, please do contact admin", 500));
     }
 };
-
-// export const confirmBooking = async (req, res, next) => {
-//     try {
-//         const errors = validationResult(req)
-//         if (! errors.isEmpty() ) {
-//             return next( new HttpError( "Something went wrong...", 422 ))
-//         } else {
-//             const { booking_id } = req.body
-
-//             const bookingDetails = await Booking.findOne({ _id: booking_id })
-//             .populate({
-//                 path : "event" , 
-//                 select : "title date"
-//             })
-//             .populate({
-//                 path : "user" , 
-//                 select : "first_name last_name email"
-//             })
-
-
-//             if (! bookingDetails) {
-//                 return next( new HttpError( 'Booking not found', 404 ) );
-//             }
-
-//             const { date, tickets } = bookingDetails;
-//             const to = bookingDetails.user.email
-//             const event = bookingDetails.event.title;
-//             const name = `${bookingDetails.user.first_name} ${bookingDetails.user.last_name}`;
-        
-//             const subject = 'Booking Confirmation';
-//             const body = `Dear ${name},\n\nYour booking for ${event} on ${date} for ${tickets} tickets is confirmed!\n\nThank you!`;
-
-//             await sendConfirmationEmail( to, subject, body);
-
-//             res.json({ message: "Email sent successfully"})
-
-//         }
-//     } catch (error) {
-//         console.log(error)
-//         return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) );
-//     }
-// }

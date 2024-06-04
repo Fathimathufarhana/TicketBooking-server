@@ -23,27 +23,6 @@ const eventSchema = new Schema({
             // required: true
         }
     },
-    // location: {
-    //     type: {
-    //       type: String,
-    //       enum: ['Point'],
-    //       required: true
-    //     },
-    //     coordinates: {
-    //       type: [Number],
-    //       required: true
-    //     }
-    // },
-    location: {
-        latitude: {
-          type: Number,
-        //   required: true
-        },
-        longitude: {
-            type: Number,
-            // required: true
-          }
-    },
     description: {
         type: String,
         required: true
@@ -54,7 +33,6 @@ const eventSchema = new Schema({
     },
     availability: {
         type: Number,
-        // required: true
     },
     isDeleted: {
         type: Boolean,
@@ -66,7 +44,6 @@ const eventSchema = new Schema({
     image: {
         type: String,
         required: true,
-        // default: null,
     },
     price: {
         type: Number,
@@ -84,9 +61,6 @@ const eventSchema = new Schema({
         ref : "Bookings",
         type: mongoose.Schema.Types.ObjectId,
     }
-    // log: {
-    //     user_id: 
-    // }
 
 },{ timestamps : true })
 

@@ -9,7 +9,7 @@ export const addVenue = async (req, res, next) => {
 
             return next( new HttpError( "Something went wrong...", 422 ))
         } else {
-            let insertVenue = await Events.updateMany({},{ venue: "calicut" })
+            let insertVenue = await Events.updateMany( {}, { venue: "calicut" } )
             res.status(200).json({
                 status: true,
                 message: 'Venue inserted',
@@ -17,7 +17,7 @@ export const addVenue = async (req, res, next) => {
                 access_token: null
             })
         }
-    } catch (error) {
+    } catch ( error ) {
         return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) );
         
     }
@@ -30,16 +30,15 @@ export const addRating = async (req, res, next) => {
 
             return next( new HttpError( "Something went wrong...", 422 ))
         } else {
-            let insertRating = await Events.updateMany({},{ star_rating: 4 })
+            let insertRating = await Events.updateMany( {}, { star_rating: 4 } )
             res.status(200).json({
                 status: true,
                 message: 'Rating inserted',
-                data: insertRating,
+                data: process.env.NODE_ENV === 'dev' ? insertRating : null,
                 access_token: null
             })
         }
-    } catch (error) {
+    } catch ( error ) {
         return next( new HttpError( "Oops! Process failed, please do contact admin", 500 ) );
-        
     }
 }

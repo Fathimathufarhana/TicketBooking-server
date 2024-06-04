@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer'
+import hbs from 'nodemailer-express-handlebars';
+import path from 'path'
 
 
 const transporter = nodemailer.createTransport({
@@ -9,14 +11,14 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// var handlebarOptions = {
-//     viewEngine: {
-//         partialDir: path.resolve('./views/'),
-//         defaultLayout: false,
-//       },
-//     viewPath: path.resolve('./views/')
-//     };
+var handlebarOptions = {
+    viewEngine: {
+        partialDir: path.resolve('./views/'),
+        defaultLayout: false,
+      },
+    viewPath: path.resolve('./views/')
+    };
 
-// transporter.use('compile', hbs(handlebarOptions))
+transporter.use('compile', hbs(handlebarOptions))
 
 export default transporter

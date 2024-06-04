@@ -13,15 +13,13 @@ import cron from 'node-cron';
 import sendReminderEmails from "./services/reminderService.js";
 import paymentRoutes from './routes/paymentRoutes.js';
 
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 
 dotenv.config()
-// console.log(process.env.EMAIL_USER)
 connectDB()
+
 const app = express()
 const port = process.env.PORT || 8000
 
@@ -39,7 +37,8 @@ cron.schedule('0 8 * * *', async () => {
     await sendReminderEmails();
 });
 
-app.use('', express.static(join(__dirname, '/uploads')));
+app.use('/cover_images', express.static(join(__dirname, 'uploads', 'cover_images')))
+app.use('/uploads/booking', express.static(join(__dirname, 'uploads', 'booking')))
 
 app.use(notFound)
 app.use(errorHandler)

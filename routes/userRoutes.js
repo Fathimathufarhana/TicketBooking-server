@@ -18,7 +18,6 @@ router.post('/register',
     check('address').not().isEmpty(),
     check('gender').not().isEmpty(),
     check('age').not().isEmpty(),
-    // check('phone. phone_number, Invalid phone number').isLength({min: 10, max: 10}),
     check('email','Invalid Email').not().isEmpty().isEmail(),
     check('password','The minimum password length is 6 characters').isLength({min: 6})
 ] ,register)
@@ -29,8 +28,6 @@ router.use(authCheck);
 router.post('/test_auth_check', authConfirmTest)
 router.post('/settings', settings)
 router.post('/view', view)
-
-
 
 
 export default router
