@@ -13,14 +13,12 @@ const eventSchema = new Schema({
     time:{
         start_date: {
             type: Date,
-            // required: true
         },
         end_date: {
             type: Date
         },
         moment: {
             type: String,
-            // required: true
         }
     },
     description: {

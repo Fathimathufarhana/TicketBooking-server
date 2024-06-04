@@ -1,6 +1,6 @@
 import moment from "moment";
 import Booking from "../models/booking.js";
-import { sendReminderEmail, sendUpdationEmail } from "./mailService.js";
+import { sendReminderEmail } from "./mailService.js";
 
 const sendReminderEmails = async () => {
     try {
@@ -9,7 +9,6 @@ const sendReminderEmails = async () => {
         const bookings = await Booking.find({
             date: { $eq: targetDate.toDate() }
         }).populate('user').populate('event');
-
 
         for (const booking of bookings) {
             const user = booking.user;

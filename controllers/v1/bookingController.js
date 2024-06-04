@@ -72,7 +72,6 @@ export const add = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
         return next(new HttpError("Oops! Process failed, please contact admin", 500));
     }
 };
