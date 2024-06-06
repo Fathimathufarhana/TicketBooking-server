@@ -26,7 +26,7 @@ router.post('/list', list)
 router.use(authCheck);
 
 router.post('/test_auth_check', authConfirmTest)
-router.post('/settings', settings)
+router.patch('/settings', settings)
 router.post('/view', view)
 
 
